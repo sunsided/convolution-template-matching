@@ -18,14 +18,16 @@ g_mask  = gleam(mask);
 
 % flip the mask along all axes to make the convolution behave
 % like a correlation.
-g_mask = rot90(g_mask, 90);
+g_mask = rot90(g_mask, 2);
 
 % perform the cross-correlation
 convolved = conv2(g_input, g_mask, 'same');
 
 % find the maximum 
 [max_value, max_index] = max(convolved(:));
-[max_row, max_col]     = ind2sub(size(convolved), max_index);
+[max_row, max_col]     = ind2sub(size(convolved), max_index)
+
+return;
 
 % show the convolution map
 figure;
