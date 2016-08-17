@@ -1,5 +1,10 @@
 % Template matching by convolution
 
+% This might not work as expected. The convolution (more specifically the 
+% cross-correlation) will multiply the kernel with the image, so each
+% occurrence of high values in the input image will also result in
+% high values in the output image, no matter the kernel.
+
 input = imread('image.jpg');
 mask  = imread('mask.jpg');
 
@@ -16,25 +21,26 @@ normalize = @(I) (I-min(min(I)))/(max(max(I))-min(min(I)));
 g_input = gleam(input);
 g_mask  = gleam(mask);
 
+% normalize the mask
+g_mask = normalize(g_mask);
+
 % flip the mask along all axes to make the convolution behave
 % like a correlation.
 g_mask = rot90(g_mask, 2);
 
 % perform the cross-correlation
-convolved = conv2(g_input, g_mask, 'same');
+convolved = conv2(g_input, g_mask, 'valid');
 
 % find the maximum 
 [max_value, max_index] = max(convolved(:));
 [max_row, max_col]     = ind2sub(size(convolved), max_index)
 
-return;
-
 % show the convolution map
 figure;
 imshow(normalize(convolved)); hold on; 
-plot(max_row, max_col, 'r+');
+plot(max_col, max_row, 'r+');
 
 % show the original image
 figure;
 imshow(g_input); hold on; 
-plot(max_row, max_col, 'r+');
+plot(max_col + size(mask,2)/2, max_row + size(mask,1)/2, 'r+');
