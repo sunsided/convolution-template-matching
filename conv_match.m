@@ -1,9 +1,14 @@
 % Template matching by convolution
 
-% This might not work as expected. The convolution (more specifically the 
-% cross-correlation) will multiply the kernel with the image, so each
-% occurrence of high values in the input image will also result in
-% high values in the output image, no matter the kernel.
+% The convolution (more specifically the cross-correlation) will multiply 
+% the kernel with the image, so each occurrence of high values in the 
+% input image will also result in high values in the output image, no 
+% matter the kernel. This is due to the fact that the (unnormalized) cross
+% correlation is not invariant to the mean value;
+% To accommodate for this, this implementation takes the horizontal
+% and vertical gradient of both image and mask and convolves on these
+% representations (i.e. in feature space), which results in the
+% expected behaior.
 
 input = imread('image.jpg');
 mask  = imread('mask.jpg');
@@ -21,26 +26,32 @@ normalize = @(I) (I-min(min(I)))/(max(max(I))-min(min(I)));
 g_input = gleam(input);
 g_mask  = gleam(mask);
 
-% normalize the mask
-g_mask = normalize(g_mask);
-
+% get the gradients
+gd_input = conv2(g_input, [-1 0 1; -1 0 1; -1 0 1]/3, 'same') + ...
+           conv2(g_input, [-1 -1 -1; 0 0 0; 1 1 1]/3, 'same');
+gd_mask  = conv2(g_mask, [-1 0 1; -1 0 1; -1 0 1]/3, 'same') + ...
+           conv2(g_mask, [-1 -1 -1; 0 0 0; 1 1 1]/3, 'same');
+      
 % flip the mask along all axes to make the convolution behave
 % like a correlation.
-g_mask = rot90(g_mask, 2);
+gd_mask = rot90(gd_mask, 2);
 
 % perform the cross-correlation
-convolved = conv2(g_input, g_mask, 'valid');
+convolved = conv2(gd_input, gd_mask, 'valid');
 
 % find the maximum 
-[max_value, max_index] = max(convolved(:));
-[max_row, max_col]     = ind2sub(size(convolved), max_index)
+[min_value, min_index] = min(convolved(:));
+[min_row, min_col]     = ind2sub(size(convolved), min_index);
 
 % show the convolution map
 figure;
 imshow(normalize(convolved)); hold on; 
-plot(max_col, max_row, 'r+');
+rectangle('Position', [min_col-32+2 min_row-32+2 64 64], 'EdgeColor', [1 0 0]);
 
 % show the original image
 figure;
-imshow(g_input); hold on; 
-plot(max_col + size(mask,2)/2, max_row + size(mask,1)/2, 'r+');
+imshow(input*0.75+64); hold on; 
+rectangle('Position', [min_col+2 min_row+2 64 64], ...
+          'EdgeColor', [0.5 0 0], ...
+          'LineWidth', 3, ...
+          'LineStyle', ':');
