@@ -36,10 +36,10 @@ gd_mask  = conv2(g_mask, [-1 0 1; -1 0 1; -1 0 1]/3, 'same') + ...
 % like a correlation.
 gd_mask = rot90(gd_mask, 2);
 
-% perform the cross-correlation
+% perform the cross-correlation (by means of convolution)
 convolved = conv2(gd_input, gd_mask, 'valid');
 
-% find the maximum 
+% find the best match location 
 [min_value, min_index] = min(convolved(:));
 [min_row, min_col]     = ind2sub(size(convolved), min_index);
 

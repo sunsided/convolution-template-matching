@@ -15,4 +15,4 @@ conv2(image, fliplr(flipud(template)) % or
 conv2(image, rot90(template, 2))
 ```
 
-Finding the template matches is then a question of finding the local maxima (i.e. areas of maximum correspondence).
+Finding the template matches is then a question of finding the local minima (i.e. areas of maximum correspondence).
