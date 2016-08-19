@@ -8,7 +8,7 @@
 % To accommodate for this, this implementation takes the horizontal
 % and vertical gradient of both image and mask and convolves on these
 % representations (i.e. in feature space), which results in the
-% expected behaior.
+% expected behavior.
 
 input = imread('image.jpg');
 mask  = imread('mask.jpg');
